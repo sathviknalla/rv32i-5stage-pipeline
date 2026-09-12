@@ -7,9 +7,9 @@ A Verilog-based 32-bit RISC-V processor targeting the **Xilinx Artix-7 FPGA**. T
 ## 📌 Project Highlights
 * **Verilog-based 32-bit RISC-V processor implementation on FPGA using Xilinx Vivado with pipeline optimization and hardware verification.**
 * **Built a 5-stage RV32I processor pipeline in Verilog using Xilinx Vivado, implementing complete data forwarding and hazard handling logic.**
-* **Optimized ALU datapath architecture to reduce dynamic power to 15.0 mW by utilizing targeted operand isolation techniques throughout.**
-* **Deferred branch logic to MEM stage for strict timing closure, achieving maximum clock frequency of 98.6 MHz with positive margins.**
-* **Verified RTL functionality across comprehensive test suites, achieving compact implementation using 1005 LUTs and 603 FPGA registers.**
+* **Optimized ALU datapath architecture to reduce dynamic power to 35.0 mW by utilizing targeted operand isolation techniques throughout.**
+* **Deferred branch logic to MEM stage for strict timing closure, achieving maximum clock frequency of 91.9 MHz with positive margins.**
+* **Verified RTL functionality across comprehensive test suites, achieving compact implementation using 951 LUTs and 635 FPGA registers.**
 
 ---
 
@@ -64,12 +64,12 @@ The design was synthesized Out-Of-Context (OOC) using **Vivado 2025.2** to evalu
 
 | Metric | Result | Target Device |
 | :--- | :--- | :--- |
-| **Maximum Frequency** | 98.6 MHz (10.13 ns Path) | Xilinx Artix-7 (`xc7a100tcsg324-1`) |
+| **Maximum Frequency** | 91.90 MHz (10.881 ns Path) | Xilinx Artix-7 (`xc7a100tcsg324-1`) |
 | **Setup Slack (WNS)** | +0.119 ns (Clean) | Target Constraint: 11.00 ns |
 | **Hold Slack (WHS)** | +0.051 ns (Clean) | Target Constraint: 11.00 ns |
-| **Logic Utilization** | 1005 Slice LUTs | Artix-7 |
-| **Register Utilization** | 603 Slice Registers | Artix-7 |
-| **Dynamic Power** | 15.0 mW | Artix-7 |
+| **Logic Utilization** | 951 Slice LUTs | Artix-7 |
+| **Register Utilization** | 635 Slice Registers | Artix-7 |
+| **Dynamic Power** | 35.0 mW | Artix-7 |
 
 ---
 
