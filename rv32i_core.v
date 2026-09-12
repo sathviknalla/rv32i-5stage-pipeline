@@ -538,6 +538,12 @@ module rv32i_core(
         .RegWrite_out(RegWrite_ex), .ALUSrc_out(ALUSrc_ex), .MemRead_out(MemRead_ex), .MemWrite_out(MemWrite_ex),
         .ResultSrc_out(ResultSrc_ex), .Branch_out(Branch_ex), .Jump_out(Jump_ex), .ALUCtrl_out(ALUCtrl_ex), .ALUEn_out(ALUEn_ex)
     );
+    // MEM Stage Declarations (moved up to fix Vivado Synth 8-6901 warning)
+    wire [2:0] ResultSrc_mem;
+    wire [31:0] pc_plus4_mem;
+    wire [31:0] pc_target_mem;
+    wire [31:0] imm_ext_mem;
+
     wire [1:0] forward_a, forward_b;
     
     // Memory stage forward data mux (resolves LUI, JAL, AUIPC in MEM stage)
@@ -583,9 +589,7 @@ module rv32i_core(
     
     // Memory
     wire RegWrite_mem;
-    wire [31:0] pc_plus4_mem, pc_target_mem, imm_ext_mem;
     wire [4:0] rd_addr_mem;
-    wire [2:0] ResultSrc_mem;
     wire Branch_mem, Jump_mem, ALUSrc_mem, cond_mem;
     
     ex_mem_reg EX_MEM(
