@@ -1,6 +1,6 @@
 # 🚀 RV32I 5-Stage Pipelined Processor
 
-A highly optimized, Verilog-based 32-bit RISC-V processor targeting the **Xilinx Artix-7 FPGA**. This project implements a classic 5-stage pipeline with robust hardware hazard management, comprehensive data forwarding, and targeted power optimizations.
+A highly optimized, Verilog-based 32-bit RISC-V processor targeting the **Xilinx Artix-7 FPGA**. This project implements a strictly compliant 5-stage pipeline with advanced hardware hazard management, comprehensive data forwarding, and custom low-power datapath techniques.
 
 ---
 
@@ -13,26 +13,39 @@ A highly optimized, Verilog-based 32-bit RISC-V processor targeting the **Xilinx
 
 ---
 
-## 🏗️ Architecture Overview
+## 🛠️ ISA Compliance & Technical Foundations
 
-The core is designed following the **RV32I Base Integer Instruction Set** and implements a textbook 5-stage pipeline:
-1. **Instruction Fetch (IF)**: Program Counter logic and Instruction Memory access.
-2. **Instruction Decode (ID)**: Instruction parsing, Register File read, and Immediate generation.
-3. **Execute (EX)**: Arithmetic Logic Unit (ALU) operations and target calculations.
-4. **Memory (MEM)**: Data Memory access and branch resolution.
-5. **Writeback (WB)**: Committing results back to the Register File.
+This core strictly adheres to the official **RV32I Base Integer Instruction Set** specifications, ensuring full architectural correctness:
+* **Register x0 Hardwiring**: Hardware enforces `x0` reads as absolute `0` and ignores all writes to address `0`, preventing software from corrupting the zero register.
+* **JALR Bit-Masking**: The LSB of the Jump and Link Register target address is forcefully cleared `(& ~1)` in the ALU to maintain proper instruction alignment per RISC-V specs.
+* **Precise Sign-Extension**: Implements exact signed/unsigned arithmetic boundaries (`slt` vs `sltu`), ensuring proper 2's complement arithmetic and signed immediate expansion.
+* **5-Stage RISC Architecture**: Instruction Fetch (`IF`), Instruction Decode (`ID`), Execute (`EX`), Memory (`MEM`), and Writeback (`WB`).
 
-### 🔥 Advanced Hardware Features
-* **Full Data Forwarding (Bypassing)**: Seamlessly routes data from the `MEM` or `WB` stages back to the `EX` stage, resolving Read-After-Write (RAW) data hazards instantly without halting execution.
-* **Load-Use Hazard Detection**: Hardware automatically intercepts load-use dependencies (an instruction immediately attempting to use `lw` data), injecting precisely one stall bubble.
-* **Aggressive Timing Optimization**: Branch resolution (`beq`, `bne`, etc.) and `jalr` target logic were intentionally deferred to the `MEM` stage. This slices the critical path in half, enabling high-frequency FPGA timing closure.
-* **Low-Power Datapath**: Employs **Operand Isolation** at the ALU inputs. When the ALU is idle (e.g., during memory operations or stalls), the inputs are frozen to `0`, preventing millions of unnecessary logic toggles and slashing dynamic power consumption.
-* **Transparent Register File**: Supports write-before-read bypassing internally, eliminating WB-to-ID register collisions.
+---
+
+## ✨ What's New: Custom Architectural Optimizations
+
+While standard textbook pipelines achieve functional correctness, they often suffer from poor frequency scaling and high power draw on FPGAs. We implemented several advanced techniques to shatter those limits:
+
+### 1. Deferred Branch Resolution (Frequency Optimization)
+In a standard 5-stage pipeline, evaluating branch conditions (`beq`, `bne`) and computing jump targets inside the Execute (`EX`) stage creates a massive combinational critical path: `Data Forwarding Mux` $\rightarrow$ `ALU Addition` $\rightarrow$ `Branch Evaluation` $\rightarrow$ `PC Target Mux`. 
+* **The Fix**: We completely re-architected the pipeline to push `pc_redirect` evaluation into the Memory (`MEM`) stage.
+* **The Result**: By eating a 3-cycle flush penalty instead of a 2-cycle penalty on taken branches, we physically separated the ALU logic from the PC multiplexing logic. This sliced the critical path down to just **8.42 ns**, safely pushing the core to **118.7 MHz** on an Artix-7.
+
+### 2. Operand Isolation (Dynamic Power Reduction)
+During memory loads (`lw`), stores (`sw`), or pipeline stall bubbles (`NOPs`), the ALU typically continues to evaluate random garbage data coming off the forwarding multiplexers, needlessly flipping billions of transistor gates.
+* **The Fix**: We implemented a technique called **Operand Isolation**. The Control Unit now explicitly disables the ALU via an `alu_en` signal. When disabled, the ALU inputs are mathematically clamped to `0`.
+* **The Result**: Static gate freezing drastically reduced the switching activity factor of the Carry-Chains, dropping the core's total dynamic power to a remarkably low **28.0 mW**.
+
+### 3. Hazard Immunity & Transparent Bypassing
+* **Load-Use Hardware Interlocking**: A dedicated Hazard Unit continuously monitors the `EX` stage for memory reads. If a consumer instruction immediately follows a load, the hardware freezes the `PC` and `IF/ID` registers, inserting exactly one `NOP` bubble to wait for RAM.
+* **EX-to-EX & MEM-to-EX Forwarding**: Data dependencies are bypassed mid-flight. Arithmetic results are routed backwards in time to the ALU inputs, completely eliminating stall penalties for mathematical sequences.
+* **Write-Before-Read Register File**: The register file acts transparently; data written on the rising clock edge is instantaneously visible to the read ports on that exact same cycle, natively eliminating `WB`-to-`ID` hazards.
 
 ---
 
 ## 📊 Synthesis & Performance Metrics
-The design was synthesized Out-Of-Context (OOC) using **Vivado 2025.2** to accurately measure the raw CPU core footprint, excluding external block RAM and I/O buffer delays.
+The design was synthesized Out-Of-Context (OOC) using **Vivado 2025.2** to accurately measure the raw CPU core footprint, explicitly excluding external block RAM and I/O buffer delays to provide genuine resume metrics.
 
 | Metric | Target / Result |
 | :--- | :--- |
@@ -41,18 +54,6 @@ The design was synthesized Out-Of-Context (OOC) using **Vivado 2025.2** to accur
 | **Logic Utilization** | 1086 Slice LUTs |
 | **Register Utilization** | 605 Slice Registers |
 | **Dynamic Power** | 28.0 mW |
-
----
-
-## 🛠️ Repository Structure
-```text
-├── rv32i_core.v        # Main RTL containing the 5-stage pipeline and hazard units
-├── tb_rv32i_core.v     # Testbench containing simulation checks and memory instantiation
-├── imem.mem            # Hex payload for Instruction Memory (Assembly Test Suite)
-├── dmem.mem            # Hex payload for Data Memory
-├── constraints.xdc     # Timing constraints for Vivado Synthesis (118.7 MHz)
-└── README.md           # Project documentation
-```
 
 ---
 
