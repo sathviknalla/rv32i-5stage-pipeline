@@ -108,7 +108,7 @@ This project focuses specifically on the base integer pipeline. It does **not** 
 ├── tb_rv32i_core.v     # Testbench containing simulation checks and memory instantiation
 ├── imem.mem            # Hex payload for Instruction Memory (Assembly Test Suite)
 ├── dmem.mem            # Hex payload for Data Memory
-├── constraints.xdc     # Timing constraints for Vivado Synthesis (118.7 MHz)
+├── constraints.xdc     # Timing constraints for Vivado Synthesis (90.9 MHz)
 ├── reports/            # Official Vivado synthesis reports (timing.rpt, util.rpt, power.rpt)
 └── README.md           # Project documentation
 ```
