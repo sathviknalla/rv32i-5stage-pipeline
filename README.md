@@ -57,6 +57,20 @@ The design was synthesized Out-Of-Context (OOC) using **Vivado 2025.2** to accur
 
 ---
 
+## 📁 Repository Structure
+
+```text
+├── rv32i_core.v        # Main RTL containing the 5-stage pipeline and hazard units
+├── tb_rv32i_core.v     # Testbench containing simulation checks and memory instantiation
+├── imem.mem            # Hex payload for Instruction Memory (Assembly Test Suite)
+├── dmem.mem            # Hex payload for Data Memory
+├── constraints.xdc     # Timing constraints for Vivado Synthesis (118.7 MHz)
+├── reports/            # Official Vivado synthesis reports (timing.rpt, util.rpt, power.rpt)
+└── README.md           # Project documentation
+```
+
+---
+
 ## 🚀 How to Run & Simulate
 1. Open **Xilinx Vivado** and create a new RTL Project targeting your specific FPGA (e.g., Artix-7).
 2. Add `rv32i_core.v` to the **Design Sources**.
