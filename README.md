@@ -77,11 +77,11 @@ The testbench output below demonstrates the core's ability to natively handle co
 
 ### 1. Load-Use Hazard Interlocking
 This trace shows a `lw` (Load Word) instruction executing. Notice how `MemRead_mem` pulses high, and the memory returns the sentinel value `deadbeef`. The Hazard Unit correctly detects that the following instruction depends on this load, stalling the Fetch and Decode stages to safely absorb the data.
-![Load-Use Hazard Waveform](images/waveform_load_use.png)
+![Load-Use Hazard Waveform](waveform_load_use.png)
 
 ### 2. Final Execution & Test Verification
 At the end of the simulation, the CPU executes the final `sw` (Store Word) instruction. `MemWrite_mem` asserts high, writing the payload `00000001` to memory address `00000ffc`. On the very next cycle, the testbench confirms functional correctness by asserting `test_result = 00000001` (Test Passed).
-![Final Execution Waveform](images/waveform_end.png)
+![Final Execution Waveform](waveform_end.png)
 
 ---
 
